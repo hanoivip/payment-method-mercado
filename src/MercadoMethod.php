@@ -2,8 +2,8 @@
 
 namespace Hanoivip\PaymentMethodMercado;
 
-use Hanoivip\IapContract\Facades\IapFacade;
 use Hanoivip\PaymentMethodContract\IPaymentMethod;
+use Hanoivip\Shop\Facades\OrderFacade;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
@@ -12,6 +12,12 @@ class MercadoMethod implements IPaymentMethod
     private $config;
     
     private $helper;
+    
+    const STATUS_INIT = 0;
+    const STATUS_PENDING = 1;
+    const STATUS_CANCEL = 2;
+    const STATUS_SUCCESS = 3;
+    const STATUS_FAILURE = 4;
     
     public function __construct(IHelper $helper)
     {
@@ -26,43 +32,32 @@ class MercadoMethod implements IPaymentMethod
 
     public function beginTrans($trans)
     {
-        $methods = $this->helper->listMethods();
-        // load player cards?
-        $cards = [];
+        $exists = MercadoTransaction::where('trans', $trans->trans_id)->get();
+        if ($exists->isNotEmpty())
+            throw new Exception('Mercado transaction already exists');
         $log = new MercadoTransaction();
         $log->trans = $trans->trans_id;
+        $log->state = self::STATUS_INIT;
+        // init...
+        $order = $trans->order;
+        $orderDetail = OrderFacade::detail($order);
+        $pref = $this->helper->payment($orderDetail);
+        $log->state = self::STATUS_PENDING;
+        $log->pref_id = $pref->id;
         $log->save();
-        session(['methods' => $methods]);
-        return new MercadoSession($trans, $methods, $cards);
+        return new MercadoSession($trans, $this->config, $pref);
     }
 
     public function request($trans, $params)
     {
-        $methods = session('methods');
-        if (empty($methods))
-        {
-            return new MercadoFailure($trans, __('hanoivip.mercado::mercado.timeout'));
-        }
-        $log = MercadoTransaction::where('trans', $trans->trans_id)->first();
-        if (empty($log))
-        {
-            return new MercadoFailure($trans, __('hanoivip.mercado::mercado.error'));
-        }
-        $method = $params['method'];
-        try 
-        {
-            $order = $trans->order;
-            $orderDetail = IapFacade::detail($order);
-            $payment = $this->helper->payment($method, $orderDetail['item'], $orderDetail['item_price']);
-            return new MercadoResult($payment);
-        } 
-        catch (Exception $ex) 
-        {
-            Log::error('Mercado request payment exception: ' . $ex->getMessage());
-            return new MercadoFailure($trans, __('hanoivip.mercado::mercado.retry'));
-        }
+        return $this->query($trans);
     }
-
+    
+    /**
+     * Still no way to actively query??
+     * {@inheritDoc}
+     * @see \Hanoivip\PaymentMethodContract\IPaymentMethod::query()
+     */
     public function query($trans, $force = false)
     {
         $log = MercadoTransaction::where('trans', $trans->trans_id)->first();
@@ -70,11 +65,15 @@ class MercadoMethod implements IPaymentMethod
         {
             return new MercadoFailure($trans, __('hanoivip.mercado::mercado.error'));
         }
-        try 
+        try
         {
-            $payment = $this->helper->query($log->payment_id);
-            return new MercadoResult($payment);
-        } catch (Exception $ex) 
+            if ($log->state == self::STATUS_PENDING) {
+                return new MercadoPending($log);
+            }
+            else {
+                return new MercadoResult($log);
+            }
+        } catch (Exception $ex)
         {
             Log::error('Mercado query payment detail exception:' . $ex->getMessage());
             return new MercadoFailure($trans, __('hanoivip.mercado::mercado.retry'));
@@ -89,13 +88,15 @@ class MercadoMethod implements IPaymentMethod
 
     public function validate($params)
     {
-        $errors = [];
-        if (!isset($params['method']))
-        {
-            $errors['method'] = "You must choose one method to pay";    
-        }
-        return $errors;
+        return [];
     }
+    
+    public function openPaymentPage($transId, $guide, $session)
+    {}
+
+    public function openPendingPage($trans)
+    {}
+
 
     
 }

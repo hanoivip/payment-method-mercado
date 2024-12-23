@@ -3,89 +3,87 @@
 namespace Hanoivip\PaymentMethodMercado;
 
 use Illuminate\Support\Facades\Log;
-use MercadoPago\Payer;
-use MercadoPago\Payment;
-use MercadoPago\SDK;
-use Mervick\CurlHelper;
 use Exception;
+use Hanoivip\Payment\Facades\BalanceFacade;
+use MercadoPago\Client\Preference\PreferenceClient;
+use MercadoPago\MercadoPagoConfig;
+use MercadoPago\Client\Payment\PaymentClient;
+
 /**
- * Non-cached helper
+ * Checkout pro helper
  * @author GameOH
  *
  */
 class Helper implements IHelper
 {
     private $cfg;
-    
-    private function getAccessToken()
-    {
-        $params = [
-            'client_secret' => $this->cfg['client_secret'],
-            'client_id' => $this->cfg['client_id'],
-            'grant_type' => 'authorization_code',
-            'code' => 'TG-abc3c6d371ac53ceece434f33d5c3b93-574432392',//user application id - user id
-            'redirect_uri' => 'http://bomarm.test/',
-        ];
-        $url = sprintf('%s/oauth/token', $this->cfg['endpoint']);
-        $response = CurlHelper::factory($url)
-        ->setHeaders(['Authorization', 'Bearer ' . $this->cfg['public_key']])
-        ->setPostParams($params)
-        ->exec();
-        print_r($response);
-        return $response['data']['access_token'];
-    }
-    
-    public function query($paymentId)
-    {
-        $payment = Payment::find_by_id($paymentId);
-        Log::debug(print_r($payment, true));
-        return $payment;
-    }
-
-    public function listMethods()
-    {
-        /*$token = $this->getAccessToken();
-        if (empty($token))
-        {
-            throw new Exception('Mercado token empty. Check client id & scret.');
-        }*/
-        print_r($this->cfg);
-        $url = sprintf('%s/v1/payment_methods', $this->cfg['endpoint']);
-        $response = CurlHelper::factory($url)
-        ->setHeaders(['Authorization', 'Bearer ' . $this->cfg['access_token']])
-        ->exec();
-        $methods = [];
-        print_r($response);
-        if ($response['status'] == 200)
-        {
-            $methods = $response['data'];
-        }
-        //Log::debug(print_r($methods, true));
-        return $methods;
-    }
-
-    public function payment($method, $item, $price)
-    {
-        $payment = new Payment();
-        
-        $payment->transaction_amount = $price;
-        $payment->token = "CARD_TOKEN";
-        $payment->description = $item;
-        $payment->installments = 1;
-        
-        $payer = new Payer();
-        $payer->email = "game.us.team@gmail.com";
-        
-        $payment->payer = $payer;
-        $payment->save(); 
-        Log::debug(print_r($payment, true));
-        return $payment;
-    }
 
     public function config($cfg)
     {
         $this->cfg = $cfg;
-        SDK::setAccessToken($cfg['access_token']);
+        $isTest = config('mercado.is_test', true);
+        MercadoPagoConfig::setAccessToken(config('mercado.access_token', ''));
+        MercadoPagoConfig::setRuntimeEnviroment($isTest ? MercadoPagoConfig::LOCAL : MercadoPagoConfig::SERVER);
     }
+    
+    public function query($paymentId)
+    {
+        $client = new PaymentClient();
+        return $client->get($paymentId);
+    }
+
+    // TODO: need a way to get CartVO
+    public function payment($orderDetail)
+    {
+        $amount = $orderDetail->price;
+        if (!empty($orderDetail->currency) && $orderDetail->currency !== 'BRL') {
+            $amount = BalanceFacade::convert($amount, $orderDetail->currency, 'BRL');
+        }
+        $product = array(
+            "id" => $orderDetail->serial,
+            "title" => "Order " . $orderDetail->serial,
+            "description" => "Order " . $orderDetail->serial,
+            "currency_id" => "BRL",
+            "quantity" => 1,
+            "unit_price" => $amount,
+        );
+        $payer = array(
+            "name" => config('mercado.proxy_name'),
+            "surname" => config('mercado.proxy_name'),
+            "email" => config('mercado.proxy_email'),
+        );
+        $request = $this->createPreferenceRequest($orderDetail->serial, array($product), $payer);
+        
+        $client = new PreferenceClient();
+        return $client->create($request);
+    }
+    
+    private function createPreferenceRequest($serial, $items, $payer): array
+    {
+        $paymentMethods = [
+            "excluded_payment_methods" => [],
+            "installments" => 12,
+            "default_installments" => 1
+        ];
+        
+        $backUrls = array(
+            'success' => route('mercado.success'),
+            'failure' => route('mercado.failure')
+        );
+        
+        $request = [
+            "items" => $items,
+            "payer" => $payer,
+            "payment_methods" => $paymentMethods,
+            "back_urls" => $backUrls,
+            "statement_descriptor" => "Extreme Game Studio",
+            "external_reference" => $serial,
+            "expires" => false,
+            "auto_return" => 'approved',
+        ];
+        
+        return $request;
+    }
+
     
 }

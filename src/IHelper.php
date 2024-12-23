@@ -2,12 +2,23 @@
 
 namespace Hanoivip\PaymentMethodMercado;
 
+use Hanoivip\Shop\Models\ShopOrder;
+use MercadoPago\Resources\Preference;
+use MercadoPago\Resources\Payment;
+
 interface IHelper {
     public function config($cfg);
-    
-    public function listMethods();
-    
+    /**
+     * Query payment record
+     * @param Payment $paymentId
+     */
     public function query($paymentId);
+    /**
+     * Trigger payment
+     * - Checkout pro
+     * @param ShopOrder $orderDetail
+     * @return Preference
+     */
+    public function payment($orderDetail);
     
-    public function payment($method, $item, $price);
 }
