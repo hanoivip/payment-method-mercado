@@ -21,8 +21,8 @@ class Helper implements IHelper
     public function config($cfg)
     {
         $this->cfg = $cfg;
-        $isTest = config('mercado.is_test', true);
-        MercadoPagoConfig::setAccessToken(config('mercado.access_token', ''));
+        $isTest = $cfg['is_test'];
+        MercadoPagoConfig::setAccessToken($cfg['access_token']);
         MercadoPagoConfig::setRuntimeEnviroment($isTest ? MercadoPagoConfig::LOCAL : MercadoPagoConfig::SERVER);
     }
     
@@ -67,8 +67,8 @@ class Helper implements IHelper
         ];
         
         $backUrls = array(
-            'success' => route('mercado.success'),
-            'failure' => route('mercado.failure')
+            'success' => route('mercado.success', ['pid' => $this->cfg['id']]),
+            'failure' => route('mercado.failure', ['pid' => $this->cfg['id']]),
         );
         
         $request = [

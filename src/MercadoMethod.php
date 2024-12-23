@@ -76,7 +76,7 @@ class MercadoMethod implements IPaymentMethod
         } catch (Exception $ex)
         {
             Log::error('Mercado query payment detail exception:' . $ex->getMessage());
-            return new MercadoFailure($trans, __('hanoivip.mercado::mercado.retry'));
+            return new MercadoFailure($trans, __('hanoivip.mercado::mercado.error'));
         }
     }
 
