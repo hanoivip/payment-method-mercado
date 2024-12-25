@@ -62,7 +62,7 @@ class MercadoPending implements IPaymentResult
 
     public function getTransId()
     {
-        return $this->trans->trans_id;
+        return $this->trans->trans;
     }
 
     public function isSuccess()

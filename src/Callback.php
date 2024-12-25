@@ -63,8 +63,8 @@ class Callback extends BaseController
             if ($orderDetail->currency !== 'BRL') {
                 $price = BalanceFacade::convert($price, $orderDetail->currency, 'BRL');
             }
-            if ($total < $orderDetail->price) {
-                Log::error("Mercado paid amount not enough $total $orderDetail->price");
+            if ($total < $price) {
+                Log::error("Mercado paid amount not enough $total $price BRL");
                 return view('hanoivip.mercado::failure-page');
             }
             // ok
