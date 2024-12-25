@@ -62,7 +62,7 @@ class Helper implements IHelper
     {
         $paymentMethods = [
             "excluded_payment_methods" => [],
-           // "installments" => 12,
+            "installments" => 12,
             "default_installments" => 1
         ];
         
