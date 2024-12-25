@@ -25,14 +25,16 @@ class MercadoResult implements IPaymentResult
 
     public function getDetail()
     {
-		$isTest = $this->config['is_test'];
-		if ($isTest) {
-		    return ['checkoutUrl' =>  'https://mercadopago.com.br/checkout/v1/redirect?pref_id=' . $this->record->pref_id];
-		}
-		else {
-		    return ['checkoutUrl' =>  'https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=' . $this->record->pref_id];
-		}
-	}
+        $isTest = $this->config['is_test'];
+        $detail = null;
+        if ($isTest) {
+            $detail = ['checkoutUrl' =>  'https://mercadopago.com.br/checkout/v1/redirect?pref_id=' . $this->trans->pref_id];
+        }
+        else {
+            $detail = ['checkoutUrl' =>  'https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=' . $this->trans->pref_id];
+        }
+        return json_encode($detail);
+    }
 
     public function toArray()
     {

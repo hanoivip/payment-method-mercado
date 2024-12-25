@@ -26,15 +26,15 @@ class MercadoPending implements IPaymentResult
 
     public function getDetail()
     {
-    {
 		$isTest = $this->config['is_test'];
+		$detail = null;
 		if ($isTest) {
-		    return ['checkoutUrl' =>  'https://mercadopago.com.br/checkout/v1/redirect?pref_id=' . $this->trans->pref_id];
+		    $detail = ['checkoutUrl' =>  'https://mercadopago.com.br/checkout/v1/redirect?pref_id=' . $this->trans->pref_id];
 		}
 		else {
-		    return ['checkoutUrl' =>  'https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=' . $this->trans->pref_id];
+		    $detail = ['checkoutUrl' =>  'https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=' . $this->trans->pref_id];
 		}
-	}
+		return json_encode($detail);
     }
 
     public function toArray()
