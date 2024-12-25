@@ -41,7 +41,7 @@ class Helper implements IHelper
         }
         $product = array(
             "id" => $orderDetail->serial,
-            "title" => "Order " . $orderDetail->serial,
+            "title" => "Order Number: " . $orderDetail->serial,
             "description" => "Order " . $orderDetail->serial,
             "currency_id" => "BRL",
             "quantity" => 1,
@@ -62,7 +62,7 @@ class Helper implements IHelper
     {
         $paymentMethods = [
             "excluded_payment_methods" => [],
-            "installments" => 12,
+           // "installments" => 12,
             "default_installments" => 1
         ];
         

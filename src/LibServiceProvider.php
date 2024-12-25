@@ -17,7 +17,7 @@ class LibServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
         $this->loadTranslationsFrom( __DIR__.'/../lang', 'hanoivip.mercado');
         $this->mergeConfigFrom( __DIR__.'/../config/mercado.php', 'mercado');
-        $this->loadViewsFrom(__DIR__ . '/../views', 'hanoivip');
+        $this->loadViewsFrom(__DIR__ . '/../views', 'hanoivip.mercado');
     }
     
     public function register()
@@ -25,5 +25,6 @@ class LibServiceProvider extends ServiceProvider
         $this->commands([
         ]);
         $this->app->bind("MercadoPaymentMethod", MercadoMethod::class);
+        $this->app->bind(IHelper::class, Helper::class);
     }
 }

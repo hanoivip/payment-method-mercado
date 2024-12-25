@@ -4,17 +4,17 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware([
     'web'
-])->namespace('Hanoivip\PaymentMethodTsr')
+])->namespace('Hanoivip\PaymentMethodMercado')
 ->prefix('mercado')
 ->group(function () {
-    Route::get('/success/{$pid}', 'Callback@success')->name('mercado.success');
-    Route::get('/failure/{$pid}', 'Callback@failure')->name('mercado.failure');
+    Route::get('/success/{pid}', 'Callback@success')->name('mercado.success');
+    Route::get('/failure/{pid}', 'Callback@failure')->name('mercado.failure');
 });
 
 Route::middleware([
     'web',
     'admin'
-])->namespace('Hanoivip\PaymentMethodTsr')
+])->namespace('Hanoivip\PaymentMethodMercado')
 ->prefix('ecmin')
 ->group(function () {
     // Module index

@@ -92,10 +92,14 @@ class MercadoMethod implements IPaymentMethod
     }
     
     public function openPaymentPage($transId, $guide, $session)
-    {}
+    {
+        return view('hanoivip.mercado::payment-page', ['trans' => $transId, 'guide' => $guide, 'data' => $session]);
+    }
 
     public function openPendingPage($trans)
-    {}
+    {
+        return view('hanoivip.mercado::pending-page', ['trans' => $trans]);
+    }
 
 
     

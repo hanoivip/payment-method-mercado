@@ -10,7 +10,7 @@ class CreateMercadoTransactions extends Migration
     {
         Schema::create('mercado_transactions', function (Blueprint $table) {
             $table->id();
-            $table->integer('trans')->nullable(false);
+            $table->string('trans')->nullable(false);
             $table->smallInteger('state')->nullable(false);
             $table->string('pref_id')->nullable(true);
             $table->string('payment_id')->nullable(true);
