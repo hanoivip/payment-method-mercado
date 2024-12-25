@@ -20,6 +20,7 @@ class MercadoSession implements IPaymentSession
     public function __construct($trans, $config, $preference)
     {
         $this->trans = $trans;
+        $this->config = $config;
         $this->preference = $preference;
     }
     
@@ -40,7 +41,7 @@ class MercadoSession implements IPaymentSession
 
     public function getData()
     {
-        $isTest = config('mercado.is_test', false);
+        $isTest = $this->config['is_test'];
         if ($isTest) {
             return ['checkoutUrl' => $this->preference->sandbox_init_point];
         } else {
