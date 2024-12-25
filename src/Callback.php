@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Routing\Controller as BaseController;
 use Exception;
 use Hanoivip\PaymentContract\Facades\PaymentFacade;
+use Hanoivip\Payment\Facades\BalanceFacade;
 use Hanoivip\Shop\Facades\OrderFacade;
 use Hanoivip\Events\Payment\TransactionUpdated;
 
@@ -57,6 +58,10 @@ class Callback extends BaseController
             if (empty($orderDetail)) {
                 Log::error("Mercado order not found");
                 return view('hanoivip.mercado::failure-page');
+            }
+            $price = $orderDetail->price;
+            if ($orderDetail->currency !== 'BRL') {
+                $price = BalanceFacade::convert($price, $orderDetail->currency, 'BRL');
             }
             if ($total < $orderDetail->price) {
                 Log::error("Mercado paid amount not enough $total $orderDetail->price");
