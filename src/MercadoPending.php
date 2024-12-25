@@ -6,14 +6,17 @@ use Hanoivip\PaymentMethodContract\IPaymentResult;
 
 class MercadoPending implements IPaymentResult
 {
+    private $config;
+    
     private $trans;
     /**
      * 
      * @param MercadoTransaction $trans
      */
-    public function __construct($trans)
+    public function __construct($trans, $config)
     {
         $this->trans = $trans;
+        $this->config = $config;
     }
     
     public function getCurrency()

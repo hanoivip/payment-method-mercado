@@ -68,10 +68,10 @@ class MercadoMethod implements IPaymentMethod
         try
         {
             if ($log->state == self::STATUS_PENDING) {
-                return new MercadoPending($log);
+                return new MercadoPending($log, $this->config);
             }
             else {
-                return new MercadoResult($log);
+                return new MercadoResult($log, $this->config);
             }
         } catch (Exception $ex)
         {
