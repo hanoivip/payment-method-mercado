@@ -45,6 +45,7 @@ class MercadoMethod implements IPaymentMethod
         $log->state = self::STATUS_PENDING;
         $log->pref_id = $pref->id;
         $log->save();
+        Log::error(print_r($this->config, true));
         return new MercadoSession($trans, $this->config, $pref);
     }
 

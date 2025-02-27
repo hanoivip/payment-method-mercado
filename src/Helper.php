@@ -21,9 +21,9 @@ class Helper implements IHelper
     public function config($cfg)
     {
         $this->cfg = $cfg;
-        $isTest = $cfg['is_test'];
+        $mode = $cfg['mode'];
         MercadoPagoConfig::setAccessToken($cfg['access_token']);
-        MercadoPagoConfig::setRuntimeEnviroment($isTest ? MercadoPagoConfig::LOCAL : MercadoPagoConfig::SERVER);
+        MercadoPagoConfig::setRuntimeEnviroment($mode == 'local' ? MercadoPagoConfig::LOCAL : MercadoPagoConfig::SERVER);
     }
     
     public function query($paymentId)

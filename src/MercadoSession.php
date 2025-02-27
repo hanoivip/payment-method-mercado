@@ -41,8 +41,8 @@ class MercadoSession implements IPaymentSession
 
     public function getData()
     {
-        $isTest = $this->config['is_test'];
-        if ($isTest) {
+        $mode = $this->config['mode'];
+        if ($mode === 'local') {
             return ['checkoutUrl' => $this->preference->sandbox_init_point];
         } else {
             return ['checkoutUrl' => $this->preference->init_point];
