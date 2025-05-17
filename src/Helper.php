@@ -79,7 +79,7 @@ class Helper implements IHelper
             "statement_descriptor" => "Extreme Game Studio",
             "external_reference" => $serial,
             "expires" => false,
-            "auto_return" => 'approved',
+            //"auto_return" => 'approved', fuck 202505 they do not need
         ];
         
         return $request;
