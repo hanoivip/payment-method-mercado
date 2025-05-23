@@ -53,6 +53,11 @@ class Callback extends BaseController
         
         $log = MercadoTransaction::where('pref_id', $preference)->first();
         if (!empty($log)) {
+            // validate status
+            if ($log->state == MercadoMethod::STATUS_SUCCESS) {
+                Log::error("Mercado transaction was done. No need to repeat: $preference");
+                return view('hanoivip.mercado::failure-page');
+            }
             // validate paid amount
             $orderDetail = OrderFacade::detail($exPreference);//$log->transaction->order);
             if (empty($orderDetail)) {
@@ -149,6 +154,21 @@ class Callback extends BaseController
             Log::error("Mercado preference not found? " . $preference);
         }
         return view('hanoivip.mercado::failure-page');
+    }
+    
+    public function pending(Request $request, $pid)
+    {
+        Log::error('Mercado got pending redirect ' . print_r($request->all(), true));
+        $preference = $request->input('preference_id');
+        $log = MercadoTransaction::where('pref_id', $preference)->first();
+        if (!empty($log)) {
+            $log->state = MercadoMethod::STATUS_PENDING;
+            $log->save();
+        }
+        else {
+            Log::error("Mercado preference not found? " . $preference);
+        }
+        return view('hanoivip.mercado::pending-page');
     }
     
 }

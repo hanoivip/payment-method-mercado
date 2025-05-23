@@ -9,6 +9,7 @@ Route::middleware([
 ->group(function () {
     Route::get('/success/{pid}', 'Callback@success')->name('mercado.success');
     Route::get('/failure/{pid}', 'Callback@failure')->name('mercado.failure');
+    Route::get('/pending/{pid}', 'Callback@pending')->name('mercado.pending');
 });
 
 Route::middleware([

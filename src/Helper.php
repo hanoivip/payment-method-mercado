@@ -69,6 +69,7 @@ class Helper implements IHelper
         $backUrls = array(
             'success' => route('mercado.success', ['pid' => $this->cfg['id']]),
             'failure' => route('mercado.failure', ['pid' => $this->cfg['id']]),
+            'pending' => route('mercado.pending', ['pid' => $this->cfg['id']]), // 202505: fuck mercado update without any notification, error display was also not correct
         );
         
         $request = [
@@ -79,7 +80,7 @@ class Helper implements IHelper
             "statement_descriptor" => "Extreme Game Studio",
             "external_reference" => $serial,
             "expires" => false,
-            //"auto_return" => 'approved', fuck 202505 they do not need
+            "auto_return" => "approved"
         ];
         
         return $request;
