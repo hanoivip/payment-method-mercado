@@ -66,10 +66,13 @@ class Helper implements IHelper
             "default_installments" => 1
         ];
         
+        // 202505: failure
+        // mercado add pending callbacks
+        // mercado force https schema
         $backUrls = array(
             'success' => route('mercado.success', ['pid' => $this->cfg['id']]),
             'failure' => route('mercado.failure', ['pid' => $this->cfg['id']]),
-            'pending' => route('mercado.pending', ['pid' => $this->cfg['id']]), // 202505: fuck mercado update without any notification, error display was also not correct
+            'pending' => route('mercado.pending', ['pid' => $this->cfg['id']]),
         );
         
         $request = [
